@@ -11,5 +11,5 @@ If multiple such cuts are present, the program has to be used repeatedly, once p
 
 Proportional Adjustment is needed when subtitles have a different playback speed than the video. 
 Simply enter 2 sets of current time of subtitle appearance and corrected time of appearance.
-Ideally, both chosen instances should be far each other for higher precision. 
+Ideally, both chosen instances should be far from each other for higher precision. 
 
