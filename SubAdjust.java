@@ -65,18 +65,7 @@ public class SubAdjust {
 
         return result;
     }
-
-    /*function for transforming srt style strings into integers*/
-    public static long timeToNumSrt(String time){
-        int hours=Integer.parseInt(time.substring(0,2));
-        int minutes=Integer.parseInt(time.substring(3,5));
-        int seconds=Integer.parseInt(time.substring(6,8));
-
-        long result=hours*3600000+minutes*60000+seconds*1000;
-
-        return result;
-    }
-
+	
 
     /*function for transforming srt style strings into integers*/
     public static long[] stringToNumsAss(String times){
@@ -136,8 +125,20 @@ public class SubAdjust {
         return result;
     }
 
+	
+	 /*function for transforming srt style strings into integers*/
+    public static long timeToNumMill(String time){
+        int hours=Integer.parseInt(time.substring(0,2));
+        int minutes=Integer.parseInt(time.substring(3,5));
+        int seconds=Integer.parseInt(time.substring(6,8));
+
+        long result=hours*3600000+minutes*60000+seconds*1000;
+
+        return result;
+    }
+	
     /*function for transforming srt style strings into integers*/
-    public static long timeToNumAss(String time){
+    public static long timeToNumCent(String time){
         int hours=Integer.parseInt(time.substring(0,2));
         int minutes=Integer.parseInt(time.substring(3,5));
         int seconds=Integer.parseInt(time.substring(6,8));
@@ -147,6 +148,16 @@ public class SubAdjust {
         return result;
     }
 
+	public static long timeToNumCenti(String time){
+        int hours=Integer.parseInt(time.substring(0,2));
+        int minutes=Integer.parseInt(time.substring(3,5));
+        int seconds=Integer.parseInt(time.substring(6,8));
+		int hundredths=Integer.parseInt(time.substring(9,11));
+		
+        long result=hours*360000+minutes*6000+seconds*100+hundredths;
+
+        return result;
+    }
 
 
 
@@ -191,7 +202,7 @@ public class SubAdjust {
         boolean additionCondition=(conditionChar=='y');
 
         long startTime=0;
-        int addConst=0;
+        long addConst=0;
         Pattern timepattern;
         if (fileType){
             timepattern = Pattern.compile("\\d\\d:\\d\\d:\\d\\d[,.]\\d\\d\\d.....\\d\\d:\\d\\d:\\d\\d[,.]\\d\\d\\d");
@@ -202,7 +213,7 @@ public class SubAdjust {
 
         if(additionCondition){
             System.out.print("Amount in tenths of seconds: ");
-            addConst = Integer.parseInt(input.nextLine().trim());
+            addConst = Integer.parseInt(input.nextLine().trim())*10;
 
             System.out.print("Should this change be limited by a start time (y/n): ");
             conditionChar = input.nextLine().trim().charAt(0);
@@ -211,29 +222,32 @@ public class SubAdjust {
             if(startTimeCondition){
                 System.out.print("Enter start time (h:m:s) each number with 2 digits: ");
                 if (fileType) {
-                    startTime = timeToNumSrt(input.nextLine().trim());
+                    startTime = timeToNumMill(input.nextLine().trim());
                 }else{
-                    startTime = timeToNumAss(input.nextLine().trim());
+                    startTime = timeToNumCent(input.nextLine().trim());
                 }
             }
         }
 
-        System.out.print("Apply proportional adjustment? (y/n): ");
-        conditionChar = input.nextLine().trim().charAt(0);
-        final boolean conversionCondition=(conditionChar=='y');
-
-        int[] conversionFactors = new int[2];
+		boolean conversionCondition=false;
+		if(!additionCondition){
+			System.out.print("Apply proportional adjustment? (y/n): ");
+			conditionChar = input.nextLine().trim().charAt(0);
+			conversionCondition=(conditionChar=='y');
+		}
+		
+        long[] conversionFactors = new long[2];
 
         if(conversionCondition){
-			System.out.println("Enter currentTime>correctTime for the first instance in tenths of seconds: ");
+			System.out.println("Enter currentTime>correctTime for the first instance in format (h:m:s:hundredthsOfSecond) each number with 2 digits: ");
 			String[] timingInstance = input.nextLine().trim().split(">");
-                    int gt1 = Integer.parseInt(timingInstance[0]);
-                    int ct1 = Integer.parseInt(timingInstance[1]);
+                    long gt1 = timeToNumCenti(timingInstance[0]);
+                    long ct1 = timeToNumCenti(timingInstance[1]);
 					
-			System.out.println("Enter currentTime>correctTime for the last instance in tenths of seconds: ");
+			System.out.println("Enter currentTime>correctTime for the last instance in format (h:m:s:hundredthsOfSecond) each number with 2 digits: ");
 			timingInstance = input.nextLine().trim().split(">");
-                    int gt2 = Integer.parseInt(timingInstance[0]);
-                    int ct2 = Integer.parseInt(timingInstance[1]);
+                    long gt2 = timeToNumCenti(timingInstance[0]);
+                    long ct2 = timeToNumCenti(timingInstance[1]);
 					
 			addConst = Math.round(ct1*gt2-ct2*gt1)/(ct2-ct1);
 			additionCondition = !(addConst==0);
@@ -273,6 +287,7 @@ public class SubAdjust {
 
             String l;
             String stime;
+			boolean printCond = true;
             /*runthrough of the input stream and extraction of the right lines*/
             while ((l = in.readLine()) != null) {
 
@@ -296,11 +311,11 @@ public class SubAdjust {
                     if(nums[0]!=0){
                         if(additionCondition&&(nums[0]>startTime)){
                             if (fileType) {
-                                nums[0]+=(addConst*100);
-                                nums[1]+=(addConst*100);
-                            }else{
                                 nums[0]+=(addConst*10);
                                 nums[1]+=(addConst*10);
+                            }else{
+                                nums[0]+=(addConst);
+                                nums[1]+=(addConst);
                             }
 
                         }
@@ -320,13 +335,18 @@ public class SubAdjust {
                         }
                     }
 
+					printCond = (nums[0]>=0);
+		
+					if (printCond){
+						out.print(stime);
 
-                    out.print(stime);
-
-                    out.println(l.substring(m.end()));
-
+						out.println(l.substring(m.end()));
+					}
+					
                 }else{
-                    out.println(l);
+					if(printCond){
+						out.println(l);
+					}
                 }
 
 
