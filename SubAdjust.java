@@ -188,7 +188,7 @@ public class SubAdjust {
         /*determination of the operations to be used*/
         System.out.print("Apply linear adjustment? (y/n): ");
         char conditionChar = input.nextLine().trim().charAt(0);
-        final boolean additionCondition=(conditionChar=='y');
+        boolean additionCondition=(conditionChar=='y');
 
         long startTime=0;
         int addConst=0;
@@ -225,6 +225,22 @@ public class SubAdjust {
         int[] conversionFactors = new int[2];
 
         if(conversionCondition){
+			System.out.println("Enter currentTime>correctTime for the first instance in tenths of seconds: ");
+			String[] timingInstance = input.nextLine().trim().split(">");
+                    int gt1 = Integer.parseInt(timingInstance[0]);
+                    int ct1 = Integer.parseInt(timingInstance[1]);
+					
+			System.out.println("Enter currentTime>correctTime for the last instance in tenths of seconds: ");
+			timingInstance = input.nextLine().trim().split(">");
+                    int gt2 = Integer.parseInt(timingInstance[0]);
+                    int ct2 = Integer.parseInt(timingInstance[1]);
+					
+			addConst = Math.round(ct1*gt2-ct2*gt1)/(ct2-ct1);
+			additionCondition = !(addConst==0);
+			
+			conversionFactors[0] = ct2;
+			conversionFactors[1] = gt2+addConst;
+			/*
             System.out.println("Factor: \n1: 23.976->24.00 \n2: 23.940->24.00 \n3: enter manually");
             conditionChar = input.nextLine().trim().charAt(0);
 
@@ -244,7 +260,7 @@ public class SubAdjust {
                 default: conversionFactors[0]=1;
                     conversionFactors[1]=1;
                     break;
-            }
+            }*/
         }
 
         BufferedReader in = null;
