@@ -20,8 +20,8 @@ Example usage cases:
 - enter file name 
 - when prompted for linear adjustment: 
 	'y'
-- when prompted for tenth of second:
-	'-15'
+- when prompted for hundreths of second:
+	'-150'
 - when prompted for start time limitation:
 	'n'
 
@@ -29,8 +29,8 @@ Example usage cases:
 - enter file name 
 - when prompted for linear adjustment: 
 	'y'
-- when prompted for tenth of second:
-	'24'
+- when prompted for hundreths of second:
+	'240'
 - when prompted for start time limitation:
 	'y'
 - when prompted for time:
