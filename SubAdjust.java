@@ -3,6 +3,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.util.regex.*;
 import java.util.Arrays;
@@ -272,9 +278,9 @@ public class SubAdjust {
         if(additionCondition){
 			retry=true;
 			while (retry){
-				System.out.print("Amount in tenths of seconds: ");
+				System.out.print("Amount in hundreths of seconds: ");
 				try{
-					addConst = Integer.parseInt(input.nextLine().trim())*100;
+					addConst = Integer.parseInt(input.nextLine().trim())*10;
 					retry=false;
 				}
 				catch (NumberFormatException e)  {System.out.println("This is not a valid integer, try again."); } 				
@@ -343,17 +349,16 @@ public class SubAdjust {
         PrintWriter out = null;
 
         try {
-            in = new BufferedReader(new FileReader(inputFileName));
-            out = new PrintWriter(new FileWriter(outputFileName));
-            int c;
+			in = new BufferedReader(new InputStreamReader(new FileInputStream(inputFileName),"UTF8"));
+            out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputFileName),"UTF8"));
+			int c;
 
             String l;
             String stime;
 			boolean printCond = true;
             /*runthrough of the input stream and extraction of the right lines*/
             while ((l = in.readLine()) != null) {
-
-                Matcher m = timepattern.matcher(l);
+				Matcher m = timepattern.matcher(l);
 
                 if (m.find()){
 
