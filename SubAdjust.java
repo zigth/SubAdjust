@@ -27,8 +27,8 @@ public class SubAdjust {
 		int milliseconds;
 		int centiseconds;
 		switch (fileExt) {
-            case ".srt":
-                hours = Integer.parseInt(times.substring(0,2));
+			case ".srt":
+				hours = Integer.parseInt(times.substring(0,2));
 				minutes = Integer.parseInt(times.substring(3,5));
 				seconds = Integer.parseInt(times.substring(6,8));
 				milliseconds = Integer.parseInt(times.substring(9,12));
@@ -43,7 +43,7 @@ public class SubAdjust {
 				result[1] = hours*3600000+minutes*60000+seconds*1000+milliseconds;
                 break;
 				
-            case ".ass":
+			case ".ass":
 				hours = Integer.parseInt(times.substring(0,1));
 				minutes = Integer.parseInt(times.substring(2,4));
 				seconds = Integer.parseInt(times.substring(5,7));
