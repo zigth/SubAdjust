@@ -47,3 +47,4 @@ Example usage cases:
 - when prompted for current time > correct time for last subtitle:
 	'01:37:11:80>01:33:10:40'
 
+In case of typos in response to any prompt 'back' can be typed during the next prompt, which will return the program to the previous prompt to allow the user to correct their mistake. 
