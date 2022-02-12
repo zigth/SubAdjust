@@ -13,7 +13,9 @@ Proportional Adjustment is needed when subtitles have a different playback speed
 Simply enter 2 sets of current time of subtitle appearance and corrected time of appearance.
 Ideally, both chosen instances should be far from each other for higher precision. 
 
-To prevent accidental overwriting of files this program does not overwrite the given files but instead places output in a new file named: xxx2.srt, where xxx is the original file's name. 
+In case of typos in response to any prompt 'back' can be typed during the next prompt, which will return the program to the previous prompt to allow the user to correct their mistake. 
+
+To prevent accidental overwriting of files this program does not overwrite the given files but instead places output in a new file named: xxx2.srt (or xxx2.ass), where xxx is the original file's name. 
  
 Example usage cases:
 1) subtitles appear 1.5 seconds to late:
@@ -24,6 +26,8 @@ Example usage cases:
 	'-150'
 - when prompted for start time limitation:
 	'n'
+- when prompted for confirmation:
+	anything other than 'back'
 
 2) subtitle are correct up to 25min 13sec into the video at which point they are 2.4 sec early:
 - enter file name 
@@ -35,6 +39,8 @@ Example usage cases:
 	'y'
 - when prompted for time:
 	'00:25:13'
+- when prompted for confirmation:
+	anything other than 'back'
 
 3) subtitles are off because of playback speed and there is also a constant offset. Earliest subtitle appearing at 1:56 should appear at 1:49 and last subtitle appearing 1:37:11.8 should appear at 1:33:10.4 :
 - enter file name 
@@ -46,5 +52,5 @@ Example usage cases:
 	'00:01:56:00>00:01:49:00'
 - when prompted for current time > correct time for last subtitle:
 	'01:37:11:80>01:33:10:40'
-
-In case of typos in response to any prompt 'back' can be typed during the next prompt, which will return the program to the previous prompt to allow the user to correct their mistake. 
+- when prompted for confirmation:
+	anything other than 'back'
