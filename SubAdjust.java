@@ -66,105 +66,63 @@ public class SubAdjust {
 		return result;
     }
 
-    /*function for transforming integers to srt or ass style strings*/
+    /*functions for transforming integers to srt or ass style strings*/
     public static String numsToString(long time1, long time2, String fileExt){
-		long milliseconds1;
-		long milliseconds2;
-		long centiseconds1;
-		long centiseconds2;
-		long seconds1;
-		long seconds2;
-		long minutes1;
-		long minutes2;
-		long hours1;
-		long hours2;
-		String shours1;
-		String shours2;
-		String sminutes1;
-		String sminutes2;
-		String sseconds1;
-		String sseconds2;
-		String smilliseconds1;
-		String smilliseconds2;
-		String scentiseconds1;
-		String scentiseconds2;
 		String result;
 		
         switch (fileExt) {
             case ".srt":
-				milliseconds1 = time1%1000;
-				time1 -= milliseconds1;
-				seconds1 = time1%60000;
-				time1 -= seconds1;
-				seconds1 /= 1000;
-				minutes1 = time1%3600000;
-				time1 -= minutes1;
-				minutes1 /= 60000;
-				hours1 = time1/3600000;
-
-				milliseconds2 = time2%1000;
-				time2 -= milliseconds2;
-				seconds2 = time2%60000;
-				time2 -= seconds2;
-				seconds2 /= 1000;
-				minutes2 = time2%3600000;
-				time2 -= minutes2;
-				minutes2 /= 60000;
-				hours2 = time2/3600000;
-
-
-				shours1 = String.format("%02d",hours1);
-				sminutes1 = String.format("%02d",minutes1);
-				sseconds1 = String.format("%02d",seconds1);
-				smilliseconds1 = String.format("%03d",milliseconds1);
-
-				shours2 = String.format("%02d",hours2);
-				sminutes2 = String.format("%02d",minutes2);
-				sseconds2 = String.format("%02d",seconds2);
-				smilliseconds2 = String.format("%03d",milliseconds2);
-
-				result = shours1+":"+sminutes1+":"+sseconds1+","+smilliseconds1+" --> "+shours2+":"+sminutes2+":"+sseconds2+","+smilliseconds2;
+				result = numToString(time1, false, true, ',','2')+" --> "+numToString(time2, false, true, ',', '2');
 				break;
 				
             case ".ass":
-				time1 = Math.round(time1/10);
-				centiseconds1 = time1%100;
-				time1 -= centiseconds1;
-				seconds1 = time1%6000;
-				time1 -= seconds1;
-				seconds1 /= 100;
-				minutes1 = time1%360000;
-				time1 -= minutes1;
-				minutes1 /= 6000;
-				hours1 = time1/360000;
-
-				time2 = Math.round(time2/10);
-				centiseconds2 = time2%100;
-				time2 -= centiseconds2;
-				seconds2 = time2%6000;
-				time2 -= seconds2;
-				seconds2 /= 100;
-				minutes2 = time2%360000;
-				time2 -= minutes2;
-				minutes2 /= 6000;
-				hours2 = time2/360000;
-				
-				shours1 = String.format("%01d",hours1);
-				sminutes1 = String.format("%02d",minutes1);
-				sseconds1 = String.format("%02d",seconds1);
-				scentiseconds1 = String.format("%02d",centiseconds1);
-
-				shours2 = String.format("%01d",hours2);
-				sminutes2 = String.format("%02d",minutes2);
-				sseconds2 = String.format("%02d",seconds2);
-				scentiseconds2 = String.format("%02d",centiseconds2);
-
-				result = shours1+":"+sminutes1+":"+sseconds1+"."+scentiseconds1+","+shours2+":"+sminutes2+":"+sseconds2+"."+scentiseconds2;
+				result = numToString(time1, true, false, '.','1')+","+numToString(time2, true, false, '.', '1');
 				break;
 				
             default:
 				result = "";
         }		
+		return result;
+    }
+	
+	public static String numToString(long time, boolean useCenti, boolean useMilli, char decimalDivider, char leadingZeros){
+		long milliseconds;
+		long centiseconds;
+		long seconds;
+		long minutes;
+		long hours;
+		String shours;
+		String sminutes;
+		String sseconds;
+		String scentiseconds;
+		String smilliseconds;
+		String result;
+		
+		milliseconds = time%1000;
+		time = Math.round(time/10);
+		centiseconds = time%100;
+		time -= centiseconds;
+        seconds = time%6000;
+		time -= seconds;
+		seconds /= 100;
+		minutes = time%360000;
+		time -= minutes;
+		minutes /= 6000;
+		hours = time/360000;
+
+		shours = String.format("%0"+leadingZeros+"d",hours);
+		sminutes = String.format("%02d",minutes);
+		sseconds = String.format("%02d",seconds);
+		scentiseconds = String.format("%02d",centiseconds);
+		smilliseconds = String.format("%03d",milliseconds);
+		
+		result = shours+":"+sminutes+":"+sseconds;
+		if (useCenti){
+			result = shours+":"+sminutes+":"+sseconds+decimalDivider+scentiseconds;
+		}
+		if (useMilli){
+			result = shours+":"+sminutes+":"+sseconds+decimalDivider+smilliseconds;
+		}
 		return result;
     }
 
@@ -203,161 +161,269 @@ public class SubAdjust {
 
 
     public static void main(String[] args) throws IOException {
-        /*initialisation of input+output stream*/
+        /*Initialization of variables*/
         Scanner input = new Scanner(System.in);
         
-        boolean invalidFileExtension = true;
 		boolean fileNotFound = true;
 		String[] fileTypes = {".srt", ".ass"};
         String fileType = "";
 		String inputFileName = "";
+		String outputFileName = "";
+		String inputString = "";
 		Pattern extensionPattern = Pattern.compile("\\.\\w+\\z");
 		Path path;
+		char conditionChar;
+		boolean additionCondition = true;
+		Pattern timepattern = Pattern.compile("");
+		long startTime = 0;
+		long addConst = 0;
+		boolean conversionCondition = false;
+		long[] conversionFactors = new long[2];
+		long gt1 = 0;
+		long ct1 = 0;
+		long gt2 = 0;
+		long ct2 = 0;
 		
-        while (invalidFileExtension || fileNotFound) {
-			System.out.print("Name of the subtitle file: ");
-			inputFileName = input.nextLine().trim();
-			
-			Matcher m = extensionPattern.matcher(inputFileName);
-			if(m.find()) {
-				fileType = m.group();
-			}
-
-			if (Arrays.asList(fileTypes).contains(fileType)){
-				invalidFileExtension=false;
-				path = Paths.get(inputFileName);
-				if (Files.exists(path)){fileNotFound = false;}
-			}else{
-				int i;
-				String testName;
-				for (i = 0; i < fileTypes.length; i++) {
-					testName = inputFileName.concat(fileTypes[i]);
-					path = Paths.get(testName);
-					if (Files.exists(path)){
-						fileNotFound = false;
-						fileType = fileTypes[i];
-						invalidFileExtension = false;
-						inputFileName=testName;
+		int step = 1;
+		boolean setup = true;
+		/*loop for setting up the variables*/
+		while (setup){
+			switch (step){
+				/*initialisation of input+output stream*/
+				case 1:
+					fileNotFound = true;
+					inputFileName = "";
+					fileType = "";
+					System.out.print("Name of the subtitle file: ");
+					inputFileName = input.nextLine().trim();
+					
+					Matcher m = extensionPattern.matcher(inputFileName);
+					if(m.find()) {
+						fileType = m.group();
 					}
-				}
-			}
-			if (invalidFileExtension || fileNotFound){
-				System.out.print("File not found, would you like to try again? (y/n): ");
-				char conditionChar = input.nextLine().trim().charAt(0);
-				if(conditionChar!='y'){
+	
+					if (Arrays.asList(fileTypes).contains(fileType)){
+						path = Paths.get(inputFileName);
+						if (Files.exists(path)){fileNotFound = false;}
+					}else{
+						int i;
+						String testName;
+						for (i = 0; i < fileTypes.length; i++) {
+							testName = inputFileName.concat(fileTypes[i]);
+							path = Paths.get(testName);
+							if (Files.exists(path)){
+								fileNotFound = false;
+								fileType = fileTypes[i];
+								inputFileName = testName;
+							}
+						}	
+					}
+					if (fileNotFound){
+						System.out.print("File not found, would you like to try again? (y/n): ");
+						conditionChar = input.nextLine().trim().toLowerCase().charAt(0);
+						if(conditionChar!='y'){
+							System.exit(0);
+						}
+					}
+					if (!fileNotFound){
+						outputFileName = inputFileName.substring(0, inputFileName.length() - fileType.length()).concat("2").concat(fileType);
+						switch (fileType) {
+						case ".srt":
+							timepattern = Pattern.compile("\\d\\d:\\d\\d:\\d\\d[,.]\\d\\d\\d.....\\d\\d:\\d\\d:\\d\\d[,.]\\d\\d\\d");
+							//00:00:47,840 --> 00:00:49,910
+							break;
+						case ".ass":
+							timepattern = Pattern.compile("\\d:\\d\\d:\\d\\d\\.\\d\\d,\\d:\\d\\d:\\d\\d\\.\\d\\d");
+							break;
+						default:
+							timepattern = Pattern.compile("");
+							System.out.print("An error occured, exiting");
+							System.exit(0);
+					}
+						step = 2;
+					}
+					break;
+				/*determination of the operations to be used*/
+				case 2:	
+					System.out.print("Apply linear adjustment? (y/n): ");
+					inputString = input.nextLine().trim().toLowerCase();
+					if (inputString.equals("back")){
+						step = 1;
+						break;
+					}
+					conditionChar = inputString.charAt(0);
+					additionCondition=(conditionChar=='y');
+					if (additionCondition){
+						step = 3;
+					}else{
+						step = 6;
+					}
+					break;
+				/*setting up the linear time adjustment*/
+				case 3:	
+					System.out.print("Amount in hundreths of seconds: ");
+					inputString = input.nextLine().trim().toLowerCase();
+					if (inputString.equals("back")){
+						step = 2;
+						break;
+					}
+					try{
+						addConst = Integer.parseInt(inputString)*10;
+						step = 4;
+					}
+					catch (NumberFormatException e)  {System.out.println("This is not a valid integer, try again."); } 	
+					break;
+				case 4:
+					System.out.print("Should this change be limited by a start time (y/n): ");
+					inputString = input.nextLine().trim().toLowerCase();
+					if (inputString.equals("back")){
+						step = 3;
+						break;
+					}
+					conditionChar = inputString.charAt(0);
+					if (conditionChar=='y'){
+						step = 5;
+					}else{
+						step = 9;
+					}
+					break;
+				case 5:
+					startTime = 0;
+					System.out.print("Enter start time (h:m:s): ");
+					inputString = input.nextLine().trim().toLowerCase();
+					if (inputString.equals("back")){
+						step = 4;
+						break;
+					}
+					startTime = timeToNum(inputString);
+					if(startTime==-1){
+						System.out.println("This is not a correct format, try again.");
+					}else{
+						step = 9;
+					}
+					break;
+				/*setting up proportional time adjustment*/
+				case 6:
+					System.out.print("Apply proportional adjustment? (y/n): ");
+					inputString = input.nextLine().trim().toLowerCase();
+					if (inputString.equals("back")){
+						step = 2;
+						break;
+					}
+					conditionChar = inputString.charAt(0);
+					conversionCondition=(conditionChar=='y');
+					if (conversionCondition){
+						step = 7;
+					}else{
+						step = 9;
+					}
+					break;
+				case 7:
+					String[] timingInstance;
+					System.out.println("Enter currentTime>correctTime for the first instance in format (h:m:s:hundredthsOfSecond): ");
+					inputString = input.nextLine().trim().toLowerCase();
+					if (inputString.equals("back")){
+						step = 6;
+						break;
+					}
+					timingInstance = inputString.split(">");
+					if (timingInstance.length>1){
+						gt1 = timeToNumCenti(timingInstance[0]);
+						ct1 = timeToNumCenti(timingInstance[1]);
+						if ((gt1!=-1)&&(ct1!=-1)){
+							step = 8;
+						}
+					}
+					if(step==7){System.out.println("This is not a correct format, try again.");}
+					break;					
+				case 8:
+					System.out.println("Enter currentTime>correctTime for the last instance in format (h:m:s:hundredthsOfSecond): ");
+					inputString = input.nextLine().trim().toLowerCase();
+					if (inputString.equals("back")){
+						step = 7;
+						break;
+					}
+					timingInstance = inputString.split(">");
+					if (timingInstance.length>1){
+						gt2 = timeToNumCenti(timingInstance[0]);
+						ct2 = timeToNumCenti(timingInstance[1]);
+						if ((gt2!=-1)&&(ct2!=-1)){
+							step = 9;
+						}
+					}
+					if(step==8){System.out.println("This is not a correct format, try again.");}
+					if(step==9){		
+						addConst = Math.round((ct1*gt2-ct2*gt1)/(ct2-ct1));
+						additionCondition = !(addConst==0);
+					
+						conversionFactors[0] = ct2;
+						conversionFactors[1] = gt2+addConst;}
+					break;
+				case 9:
+					System.out.println("input file: "+inputFileName);
+					if (additionCondition && !conversionCondition){
+						System.out.println("adjustment type: linear");
+						System.out.println("time offset: "+addConst/1000+"."+Math.round(Math.abs(addConst)/10)%100);
+						if (startTime!=0){
+							System.out.println("start time restriction: "+numToString(startTime,false,false,',','1'));
+						}else{
+							System.out.println("no start time restriction");
+						}						
+					}
+					if (conversionCondition){
+						System.out.println("First timing correction: "+numToString(gt1,true,false,',','1')+" > "+numToString(ct1,true,false,',','1'));
+						System.out.println("Last timing correction: "+numToString(gt2,true,false,',','1')+" > "+numToString(ct2,true,false,',','1'));
+					}
+					if (!additionCondition && !conversionCondition){
+						System.out.println("No changes made!");
+					}
+					System.out.println("Are these parameters correct? (y/back): ");
+					inputString = input.nextLine().trim().toLowerCase();
+					if (inputString.equals("back")){
+						if (startTime!=0){
+							step = 5;
+							break;
+						}
+						if (conversionCondition){
+							step = 8;
+							break;
+						}
+						if (additionCondition){
+							step = 4;
+							break;
+						}
+						step = 6;
+						break;
+					}
+					step = 10;
+					break;
+				/*setup of variables is now done*/	
+				case 10:
+					setup=false;
+					if (!additionCondition && !conversionCondition){
+						System.exit(1);
+					}
+					break;
+				default:
+					System.out.print("An error occured, exiting");
 					System.exit(0);
-				}
-			} 
-
-        }
-				
-        String outputFileName = inputFileName.substring(0, inputFileName.length() - fileType.length()).concat("2").concat(fileType);
-        		
-        /*determination of the operations to be used*/
-		System.out.print("Apply linear adjustment? (y/n): ");
-        char conditionChar = input.nextLine().trim().charAt(0);
-        boolean additionCondition=(conditionChar=='y');
-
-        long startTime=0;
-        long addConst=0;
-        Pattern timepattern;
-		switch (fileType) {
-            case ".srt":
-                timepattern = Pattern.compile("\\d\\d:\\d\\d:\\d\\d[,.]\\d\\d\\d.....\\d\\d:\\d\\d:\\d\\d[,.]\\d\\d\\d");
-				//00:00:47,840 --> 00:00:49,910
-                break;
-            case ".ass":
-                timepattern = Pattern.compile("\\d:\\d\\d:\\d\\d\\.\\d\\d,\\d:\\d\\d:\\d\\d\\.\\d\\d");
-                break;
-            default:
-				timepattern = Pattern.compile("");
-                System.out.print("An error occured, exiting");
-				System.exit(0);
-        }
-		boolean retry=false;
-        if(additionCondition){
-			retry=true;
-			while (retry){
-				System.out.print("Amount in hundreths of seconds: ");
-				try{
-					addConst = Integer.parseInt(input.nextLine().trim())*10;
-					retry=false;
-				}
-				catch (NumberFormatException e)  {System.out.println("This is not a valid integer, try again."); } 				
+					break;
 			}
-            System.out.print("Should this change be limited by a start time (y/n): ");
-            conditionChar = input.nextLine().trim().charAt(0);
-            final boolean startTimeCondition=(conditionChar=='y');
-
-			retry=true;
-            while(startTimeCondition && retry){
-                System.out.print("Enter start time (h:m:s): ");
-                startTime = timeToNum(input.nextLine().trim());
-				if(startTime==-1){
-					System.out.println("This is not a correct format, try again.");
-				}else{
-					retry=false;
-				}
-            }
-        }
-
-		boolean conversionCondition=false;
-		if(!additionCondition){
-			System.out.print("Apply proportional adjustment? (y/n): ");
-			conditionChar = input.nextLine().trim().charAt(0);
-			conversionCondition=(conditionChar=='y');
 		}
-		
-        long[] conversionFactors = new long[2];
-
-        if(conversionCondition){
-			long gt1=0;
-			long ct1=0;
-			long gt2=0;
-			long ct2=0;
-			String[] timingInstance;
-			retry=true;
-			while(retry){
-				System.out.println("Enter currentTime>correctTime for the first instance in format (h:m:s:hundredthsOfSecond): ");
-				timingInstance = input.nextLine().trim().split(">");
-				if (timingInstance.length>1){
-					gt1 = timeToNumCenti(timingInstance[0]);
-					ct1 = timeToNumCenti(timingInstance[1]);
-					if ((gt1!=-1)&&(ct1!=-1)){retry=false;}
-				}
-				if(retry){System.out.println("This is not a correct format, try again.");}
-			}
-			retry=true;
-			while(retry){
-				System.out.println("Enter currentTime>correctTime for the last instance in format (h:m:s:hundredthsOfSecond): ");
-				timingInstance = input.nextLine().trim().split(">");
-                if (timingInstance.length>1){
-					gt2 = timeToNumCenti(timingInstance[0]);
-                    ct2 = timeToNumCenti(timingInstance[1]);
-					if ((gt2!=-1)&&(ct2!=-1)){retry=false;}
-				}
-				if(retry){System.out.println("This is not a correct format, try again.");}
-			}		
-			addConst = Math.round((ct1*gt2-ct2*gt1)/(ct2-ct1));
-			additionCondition = !(addConst==0);
-			
-			conversionFactors[0] = ct2;
-			conversionFactors[1] = gt2+addConst;
-        }
-
+	
         BufferedReader in = null;
         PrintWriter out = null;
 
         try {
 			in = new BufferedReader(new InputStreamReader(new FileInputStream(inputFileName),"UTF8"));
-            out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputFileName),"UTF8"));
+			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputFileName),"UTF8"));
 			int c;
 
-            String l;
-            String stime;
+			String l;
+			String stime;
 			boolean printCond = true;
-            /*runthrough of the input stream and extraction of the right lines*/
-            while ((l = in.readLine()) != null) {
+			/*runthrough of the input stream and extraction of the right lines*/
+			while ((l = in.readLine()) != null) {
 				Matcher m = timepattern.matcher(l);
 
                 if (m.find()){
