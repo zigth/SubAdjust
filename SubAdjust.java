@@ -41,7 +41,7 @@ public class SubAdjust {
 				milliseconds = Integer.parseInt(times.substring(26,29));
 
 				result[1] = hours*3600000+minutes*60000+seconds*1000+milliseconds;
-                break;
+				break;
 				
 			case ".ass":
 				hours = Integer.parseInt(times.substring(0,1));
@@ -57,7 +57,7 @@ public class SubAdjust {
 				centiseconds = Integer.parseInt(times.substring(19,21));
 
 				result[1] = hours*3600000+minutes*60000+seconds*1000+centiseconds*10;
-                break;
+				break;
 				
             default:
 				result[0] = 0;
@@ -363,7 +363,9 @@ public class SubAdjust {
 					System.out.println("input file: "+inputFileName);
 					if (additionCondition && !conversionCondition){
 						System.out.println("adjustment type: linear");
-						System.out.println("time offset: "+addConst/1000+"."+Math.round(Math.abs(addConst)/10)%100);
+						String sign = "";
+						if (addConst < 0){sign="-";} 
+						System.out.println("time offset: "+sign+Math.abs(addConst)/1000+"."+Math.round(Math.abs(addConst)/10)%100);
 						if (startTime!=0){
 							System.out.println("start time restriction: "+numToString(startTime,false,false,',','1'));
 						}else{
